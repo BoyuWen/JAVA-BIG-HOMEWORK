@@ -53,14 +53,14 @@ public class ClientFrame extends JFrame {
     }
     //创建linkpanel
     public JPanel createLinkpanel(){
-        JLabel linklabel = new JLabel("联系人列表");
-        linklabel.setBounds(0,0,250,50);
-        linklabel.setBorder(BorderFactory.createLineBorder(new Color(9,164,220)));
+        JLabel linklabel = new JLabel("联系人",JLabel.CENTER);
+        linklabel.setFont(new Font(null,Font.PLAIN,20));
+        linklabel.setBounds(10,0,230,50);
         //设置linkpanel
         JPanel linkpanel = new JPanel();
         linkpanel.setLayout(null);
         linkpanel.setBounds(70,0,250,550);
-        linkpanel.setBorder(BorderFactory.createLineBorder(new Color(9,164,220)));
+        linkpanel.setBorder(BorderFactory.createMatteBorder(0,0,0,1,new Color(201,202,203)));
         //添加组件
         linkpanel.add(linklabel);
         return linkpanel;
@@ -69,12 +69,12 @@ public class ClientFrame extends JFrame {
     public JPanel createChatpanel(){
         JLabel namelabel = new JLabel();
         namelabel.setBounds(0,0,480,50);
-        namelabel.setBorder(BorderFactory.createLineBorder(new Color(9,164,220)));
+        namelabel.setBorder(BorderFactory.createMatteBorder(0,0,1,0,new Color(201,202,203)));
         //设置chatpanel
         JPanel chatpanel = new JPanel();
         chatpanel.setLayout(null);
         chatpanel.setBounds(320,0,480,350);
-        chatpanel.setBorder(BorderFactory.createLineBorder(new Color(9,164,220)));
+        chatpanel.setBorder(BorderFactory.createMatteBorder(0,0,1,0,new Color(201,202,203)));
         //添加组件
         chatpanel.add(namelabel);
         return chatpanel;
@@ -83,21 +83,25 @@ public class ClientFrame extends JFrame {
     public JPanel createTextpanel(){
         //发送按钮
         JButton sendbutton = new JButton("发送");
-        sendbutton.setBounds(390,10,70,20);
-        sendbutton.setForeground(new Color(9,164,220));
-        //sendbutton.setBorder(BorderFactory.createLineBorder(new Color(9,164,220)));
+        sendbutton.setBounds(410,10,70,160);
+        sendbutton.setBorder(BorderFactory.createMatteBorder(0,1,0,0,new Color(201,202,203)));
         //输入框
         JTextArea inputarea = new JTextArea();
-        inputarea.setBounds(20,40,440,130);
-        inputarea.setOpaque(true);
+        inputarea.setLineWrap(true); //设置自动换行
+        inputarea.setOpaque(false);
+        //滚动框
+        JScrollPane inputscroll = new JScrollPane(inputarea);
+        inputscroll.setBounds(15,15,395,150);
+        inputscroll.setBorder(BorderFactory.createEmptyBorder());
+        inputscroll.setOpaque(false);
+        inputscroll.getViewport().setOpaque(false); //设置文本框透明，三处都要有
         //设置textpanel
         JPanel textpanel = new JPanel();
         textpanel.setLayout(null);
         textpanel.setBounds(320,350,480,200);
-        textpanel.setBorder(BorderFactory.createLineBorder(new Color(9,164,220)));
         //添加组件
         textpanel.add(sendbutton);
-        textpanel.add(inputarea);
+        textpanel.add(inputscroll);
         return textpanel;
     }
     public static void main(String[] args){
