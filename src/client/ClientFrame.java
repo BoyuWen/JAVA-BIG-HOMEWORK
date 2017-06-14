@@ -21,6 +21,7 @@ public class ClientFrame extends JFrame {
         add(createTextpanel());
         //设置Frame
         setLayout(null);
+        setBackground(new Color(250,250,250));
         setVisible(true);
         setDefaultCloseOperation(3);
         setSize(800,550);
@@ -58,7 +59,6 @@ public class ClientFrame extends JFrame {
         JLabel linklabel = new JLabel("联系人",JLabel.CENTER);
         linklabel.setFont(new Font(null,Font.PLAIN,20));
         linklabel.setBounds(0,0,250,50);
-        //linklabel.setBorder(BorderFactory.createLineBorder(Color.blue));
 
         JPanel labelpanel = new JPanel();
         labelpanel.setLayout(null);
@@ -70,14 +70,21 @@ public class ClientFrame extends JFrame {
     }
     //创建linkpanel
     public JPanel createLinkpanel(){
+        //设置联系人滚动框
+        JScrollPane linkscroll = new JScrollPane();
+        linkscroll.setOpaque(false);
+        linkscroll.getViewport().setOpaque(false);
+        linkscroll.setBounds(0,0,240,550);
+        linkscroll.setBorder(BorderFactory.createEmptyBorder());
         //设置linkpanel
         JPanel linkpanel = new JPanel();
         linkpanel.setBackground(new Color(250,250,250));
-        linkpanel.setBounds(70,50,250,550);
+        linkpanel.setBounds(80,50,240,550);
         linkpanel.setBorder(BorderFactory.createMatteBorder(0,0,0,1,gray));
         //箱式布局设置
         BoxLayout boxlayout = new BoxLayout(linkpanel,BoxLayout.Y_AXIS);
         linkpanel.setLayout(boxlayout);
+        linkpanel.add(linkscroll);
         //添加组件
         return linkpanel;
     }
