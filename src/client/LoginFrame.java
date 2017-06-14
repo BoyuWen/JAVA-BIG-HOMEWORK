@@ -36,7 +36,6 @@ public class LoginFrame extends JFrame {
         img.setImage(img.getImage().getScaledInstance(105,111,Image.SCALE_DEFAULT)); //使图片跟随label大小
         JLabel headimg = new JLabel(img);
         headimg.setBounds(40,8,105,111);
-        //headimg.setBorder(BorderFactory.createLineBorder(Color.GRAY));
 
         westpanel.setPreferredSize(new Dimension(160,0));
         westpanel.setOpaque(false);
@@ -61,7 +60,7 @@ public class LoginFrame extends JFrame {
         pwd.setBounds(0,37,190,37);
 
         JButton btnlogin = new JButton("登陆");
-        btnlogin.setBounds(0,79,190,40);
+        btnlogin.setBounds(4,79,182,40);
         btnlogin.setBackground(new Color(9,164,220));
         btnlogin.setForeground(Color.WHITE);
         btnlogin.setOpaque(true);
