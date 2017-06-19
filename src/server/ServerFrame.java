@@ -2,15 +2,12 @@ package server;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
+import java.awt.event.*;
 import java.io.IOException;
-import java.net.InetAddress;
-import java.net.ServerSocket;
-import java.net.Socket;
-import java.net.UnknownHostException;
+import java.net.*;
+
+import static Tool.CloseUtil.closeAll;
+
 
 /**
  * Created by Dr.Wen on 2017/6/11.
@@ -43,7 +40,6 @@ public class ServerFrame extends JFrame implements ActionListener {
         setSize(350,550);
         setLocationRelativeTo(null);
         setVisible(true);
-        setDefaultCloseOperation(3);
     }
     //
     private void addEvent(){
@@ -86,7 +82,7 @@ public class ServerFrame extends JFrame implements ActionListener {
                 text1.append("已从IP"+socket.getInetAddress().getHostAddress()+",端口"+socket.getPort()+"接收到数据...");
                 
             }catch (IOException e){
-
+                closeAll();
             }
         }
     }

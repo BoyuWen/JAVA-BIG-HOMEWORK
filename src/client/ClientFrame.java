@@ -2,17 +2,25 @@ package client;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.io.*;
 import java.net.Socket;
+
+import static Tool.CloseUtil.closeAll;
 
 /**
  * Created by Dr.Wen on 2017/6/11.
  */
 public class ClientFrame extends JFrame {
-    JLabel imglabel;
-    JButton logoutbutton,exitbutton;
-    JPanel selfpanel;
-    //private DataOutputStream out;
+    private JLabel imglabel,linklabel,namelabel;
+    private JButton logoutbutton,exitbutton,sendbutton;
+    private JPanel selfpanel,labelpanel,linkpanel,chatpanel,textpanel;
+    private JScrollPane linkscroll,chatscroll,inputscroll;
+    private JTextArea chattext,inputtext;
+
+    private DataOutputStream out;
+    private Socket client;
     //private DataInputStream in;
     private Color blue = new Color(9,164,220);
     private Color gray = new Color(201,202,203);
@@ -20,8 +28,8 @@ public class ClientFrame extends JFrame {
         createFrame();
         //
         try {
-            Socket client = new Socket("location",8888);
-            new Thread(new ClientReceiveThread(client)).start();
+            client = new Socket("location",8888);
+            new Thread(new ClientReceiveThread(client,chattext)).start();
         } catch (IOException e) {
 
         }
@@ -29,7 +37,26 @@ public class ClientFrame extends JFrame {
         addEvent();
     }
     private void addEvent(){
-
+        sendbutton.addActionListener(new ActionListener() {
+            String str = null;
+            @Override
+            public void actionPerformed(ActionEvent actionEvent) {
+                try {
+                    out = new DataOutputStream(client.getOutputStream());
+                } catch (IOException e) {
+                    closeAll();
+                }
+                str = inputtext.getText();
+                try {
+                    out.writeUTF(str);
+                } catch (IOException e) {
+                    closeAll();
+                }
+                chattext.append("我:\n");
+                chattext.append("\t\t"+str+"\n");
+                inputtext.setText("");
+            }
+        });
     }
     //创建Frame函数
     private void createFrame(){
@@ -75,11 +102,11 @@ public class ClientFrame extends JFrame {
     }
     //创建labelpanel
     private JPanel createLabelpanel(){
-        JLabel linklabel = new JLabel("联系人",JLabel.CENTER);
+        linklabel = new JLabel("联系人",JLabel.CENTER);
         linklabel.setFont(new Font(null,Font.PLAIN,20));
         linklabel.setBounds(0,0,250,50);
 
-        JPanel labelpanel = new JPanel();
+        labelpanel = new JPanel();
         labelpanel.setLayout(null);
         labelpanel.setBackground(new Color(250,250,250));
         labelpanel.setBounds(70,0,250,50);
@@ -90,13 +117,13 @@ public class ClientFrame extends JFrame {
     //创建linkpanel
     private JPanel createLinkpanel(){
         //设置联系人滚动框
-        JScrollPane linkscroll = new JScrollPane();
+        linkscroll = new JScrollPane();
         linkscroll.setOpaque(false);
         linkscroll.getViewport().setOpaque(false);
         linkscroll.setBounds(0,0,240,550);
         linkscroll.setBorder(BorderFactory.createEmptyBorder());
         //设置linkpanel
-        JPanel linkpanel = new JPanel();
+        linkpanel = new JPanel();
         linkpanel.setBackground(new Color(250,250,250));
         linkpanel.setBounds(80,50,240,550);
         linkpanel.setBorder(BorderFactory.createMatteBorder(0,0,0,1,gray));
@@ -113,22 +140,22 @@ public class ClientFrame extends JFrame {
     }
     //创建chatpanel
     private JPanel createChatpanel(){
-        JLabel namelabel = new JLabel();
+        namelabel = new JLabel();
         namelabel.setBounds(0,0,480,50);
         namelabel.setBorder(BorderFactory.createMatteBorder(0,0,1,0,gray));
         //聊天文本框
-        JTextArea chattext = new JTextArea();
+        chattext = new JTextArea();
         chattext.setOpaque(false);
         chattext.setLineWrap(true);
         chattext.setEditable(false);
         //聊天滚动框
-        JScrollPane chatscroll = new JScrollPane(chattext);
+        chatscroll = new JScrollPane(chattext);
         chatscroll.setOpaque(false);
         chatscroll.getViewport().setOpaque(false);
         chatscroll.setBorder(BorderFactory.createEmptyBorder());
         chatscroll.setBounds(10,60,460,280);
         //设置chatpanel
-        JPanel chatpanel = new JPanel();
+        chatpanel = new JPanel();
         chatpanel.setLayout(null);
         chatpanel.setBackground(new Color(240,240,240));
         chatpanel.setBounds(320,0,480,350);
@@ -141,21 +168,21 @@ public class ClientFrame extends JFrame {
     //创建textpanel
     private JPanel createTextpanel(){
         //发送按钮
-        JButton sendbutton = new JButton("发送");
+        sendbutton = new JButton("发送");
         sendbutton.setBounds(410,10,70,160);
         sendbutton.setBorder(BorderFactory.createMatteBorder(0,1,0,0,gray));
         //输入框
-        JTextArea inputarea = new JTextArea();
-        inputarea.setLineWrap(true); //设置自动换行
-        inputarea.setOpaque(false);
+        inputtext = new JTextArea();
+        inputtext.setLineWrap(true); //设置自动换行
+        inputtext.setOpaque(false);
         //滚动框
-        JScrollPane inputscroll = new JScrollPane(inputarea);
+        inputscroll = new JScrollPane(inputtext);
         inputscroll.setBounds(15,15,395,150);
         inputscroll.setBorder(BorderFactory.createEmptyBorder());
         inputscroll.setOpaque(false);
         inputscroll.getViewport().setOpaque(false); //设置文本框透明，三处都要有
         //设置textpanel
-        JPanel textpanel = new JPanel();
+        textpanel = new JPanel();
         textpanel.setLayout(null);
         textpanel.setBackground(new Color(240,240,240));
         textpanel.setBounds(320,350,480,200);

@@ -1,5 +1,6 @@
 package client;
 
+import javax.swing.*;
 import java.io.*;
 import java.net.Socket;
 
@@ -9,13 +10,15 @@ import static Tool.CloseUtil.closeAll;
  * Created by Dr.Wen on 2017/6/19.
  */
 public class ClientReceiveThread implements Runnable{
-    private DataOutputStream out;
+    JTextArea chattext;
+    //private DataOutputStream out;
     private DataInputStream in;
     private Boolean isRun = true;
 
-    public ClientReceiveThread(Socket client){
+    public ClientReceiveThread(Socket client, JTextArea chattext){
+        this.chattext = chattext;
         try {
-            out = new DataOutputStream(client.getOutputStream());
+            //out = new DataOutputStream(client.getOutputStream());
             in = new DataInputStream(client.getInputStream());
         } catch (IOException e) {
             isRun = false;
@@ -38,7 +41,8 @@ public class ClientReceiveThread implements Runnable{
     }
     //在面板显示
     private void show(String str){
-
+        chattext.append("对方:\n");
+        chattext.append("\t\t"+str+"\n");
     }
 
     public void run(){
