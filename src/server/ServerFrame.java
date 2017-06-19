@@ -4,27 +4,36 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+import java.io.IOException;
+import java.net.InetAddress;
+import java.net.ServerSocket;
+import java.net.Socket;
+import java.net.UnknownHostException;
 
 /**
  * Created by Dr.Wen on 2017/6/11.
  */
 public class ServerFrame extends JFrame implements ActionListener {
-    private JButton button1,button2,button3,startbutton;
+    private JButton button1,button2,button3,startbutton,sendbutton;
     private JTextArea text1,text2,text3;
     private JScrollPane scroll1,scroll2,scroll3;
     private JPanel buttonpanel,tabpanel,startpanel;
 
-    CardLayout card = new CardLayout();
-    Font forefont = new Font(null,0,15);
-    Font hindfont = new Font(null,1,17);
-    Color blue = new Color(9,164,220);
-    Color gray = new Color(231,231,231);
+    private CardLayout card = new CardLayout();
+    private Font forefont = new Font(null,0,15);
+    private Font hindfont = new Font(null,1,17);
+    private Color blue = new Color(9,164,220);
+    private Color gray = new Color(231,231,231);
+    private ServerSocket serversocket;
 
-    public ServerFrame(){
+    private ServerFrame(){
         createFrame();
+        addEvent();
     }
     //生成Frame方法
-    public void createFrame(){
+    private void createFrame(){
         add(createButtonpanel());
         add(createTabpanel());
         add(createStartpanel());
@@ -37,41 +46,86 @@ public class ServerFrame extends JFrame implements ActionListener {
         setDefaultCloseOperation(3);
     }
     //
+    private void addEvent(){
+        addWindowListener(new WindowAdapter()
+        {
+            @Override
+            public void windowClosing(WindowEvent e)
+            {
+                int t = JOptionPane.showConfirmDialog(null, "确认要退出服务器吗？", "确认退出", JOptionPane.OK_CANCEL_OPTION);
+                if (t == JOptionPane.OK_OPTION)
+                {
+                    System.exit(0);
+                }
+            }
+        });
+        startbutton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent actionEvent) {
+                try{
+                    serversocket = new ServerSocket(8888);
+                    new Thread(new Runnable() {
+                        @Override
+                        public void run() {
+                            startServer();
+                        }
+                    }).start();
+                }catch (IOException e){}
+            }
+        });
+        button1.addActionListener(this);
+        button2.addActionListener(this);
+        button3.addActionListener(this);
+    }
+    //
+    private void startServer(){
+        while(true){
+            try{
+                text1.append("开始监听客户端连接...\n");
+                printServerInfo();
+                Socket socket = serversocket.accept();
+                text1.append("已从IP"+socket.getInetAddress().getHostAddress()+",端口"+socket.getPort()+"接收到数据...");
+
+            }catch (IOException e){
+
+            }
+        }
+    }
+    //
+    private void printServerInfo(){
+
+
+    }
+    //
     public void actionPerformed(ActionEvent e){
         if (e.getSource() == button1){
             setButton1();
             restoreButton2();
             restoreButton3();
             card.first(tabpanel);
-            text1.setText("状态");
         }else if(e.getSource() == button2){
             setButton2();
             restoreButton1();
             restoreButton3();
             card.show(tabpanel,"详情");
-            text2.setText("详情");
         }else if(e.getSource() == button3){
             setButton3();
             restoreButton1();
             restoreButton2();
             card.last(tabpanel);
-            text3.setText("用户");
         }
     }
     //创建buttonpanel
-    public JPanel createButtonpanel(){
+    private JPanel createButtonpanel(){
         //创建三个button
         button1 = new JButton("状态");
         restoreButton1();
         button1.setBorder(BorderFactory.createMatteBorder(0,0,0,1,gray));
-        button1.addActionListener(this);
-        button2 = new JButton("详情");
+        button2 = new JButton("通知");
         restoreButton2();
         button2.setBorder(BorderFactory.createMatteBorder(0,0,0,1,gray));
-        button2.addActionListener(this);
         button3 = new JButton("用户");
         restoreButton3();
-        button3.addActionListener(this);
         //设置buttonpanel
         buttonpanel = new JPanel(null);
         buttonpanel.setLayout(null);
@@ -83,7 +137,7 @@ public class ServerFrame extends JFrame implements ActionListener {
         return buttonpanel;
     }
     //创建tabpanel
-    public JPanel createTabpanel(){
+    private JPanel createTabpanel(){
         //创建三个文本框
         text1 = new JTextArea();
         text1.setOpaque(false);
@@ -92,7 +146,6 @@ public class ServerFrame extends JFrame implements ActionListener {
         text2 = new JTextArea();
         text2.setOpaque(false);
         text2.setLineWrap(true);
-        text2.setEditable(false);
         text3 = new JTextArea();
         text3.setOpaque(false);
         text3.setLineWrap(true);
@@ -121,22 +174,28 @@ public class ServerFrame extends JFrame implements ActionListener {
         return tabpanel;
     }
     //创建startpanel
-    public JPanel createStartpanel(){
+    private JPanel createStartpanel(){
         //设置开始按钮
         startbutton = new JButton("运行");
         startbutton.setFont(forefont);
-        startbutton.setBounds(120,5,120,40);
+        startbutton.setBounds(50,5,100,40);
         startbutton.setForeground(blue);
+        //设置发送按钮
+        sendbutton = new JButton("发送");
+        sendbutton.setFont(forefont);
+        sendbutton.setBounds(200,5,100,40);
+        sendbutton.setForeground(blue);
         //设置startpanel
         startpanel = new JPanel();
         startpanel.setLayout(null);
         startpanel.setBounds(0,480,350,50);
         startpanel.setBackground(blue);
         startpanel.add(startbutton);
+        startpanel.add(sendbutton);
         return startpanel;
     }
     //设置button1样式
-    public void setButton1(){
+    private void setButton1(){
         button2.setBorder(BorderFactory.createMatteBorder(0,0,0,1,gray));
         button1.setBounds(0,0,116,40);
         button1.setFont(hindfont);
@@ -145,14 +204,14 @@ public class ServerFrame extends JFrame implements ActionListener {
         button1.setOpaque(true);
     }
     //还原button1样式
-    public void restoreButton1(){
+    private void restoreButton1(){
         button1.setFont(forefont);
         button1.setBounds(0,7,116,26);
         button1.setOpaque(false);
         button1.setForeground(gray);
     }
     //设置button2样式
-    public void setButton2(){
+    private void setButton2(){
         button1.setBorder(BorderFactory.createMatteBorder(0,0,0,1,blue));
         button2.setBounds(116,0,118,40);
         button2.setFont(hindfont);
@@ -162,15 +221,14 @@ public class ServerFrame extends JFrame implements ActionListener {
         button2.setBorder(BorderFactory.createMatteBorder(0,0,0,1,gray));
     }
     //还原button2样式
-    public void restoreButton2(){
+    private void restoreButton2(){
         button2.setFont(forefont);
         button2.setBounds(116,7,118,26);
         button2.setOpaque(false);
         button2.setForeground(gray);
-        //button2.setBorder(BorderFactory.createMatteBorder(0,0,0,1,gray));
     }
     //设置button3样式
-    public void setButton3(){
+    private void setButton3(){
         button1.setBorder(BorderFactory.createMatteBorder(0,0,0,1,gray));
         button2.setBorder(BorderFactory.createMatteBorder(0,0,0,1,blue));
         button3.setBounds(234,0,116,40);
@@ -180,7 +238,7 @@ public class ServerFrame extends JFrame implements ActionListener {
         button3.setOpaque(true);
     }
     //还原button3样式
-    public void restoreButton3(){
+    private void restoreButton3(){
         button3.setFont(forefont);
         button3.setBounds(234,7,116,26);
         button3.setOpaque(false);

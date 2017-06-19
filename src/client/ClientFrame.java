@@ -7,13 +7,13 @@ import java.awt.*;
  * Created by Dr.Wen on 2017/6/11.
  */
 public class ClientFrame extends JFrame {
-    Color blue = new Color(9,164,220);
-    Color gray = new Color(201,202,203);
-    public ClientFrame(){
+    private Color blue = new Color(9,164,220);
+    private Color gray = new Color(201,202,203);
+    private ClientFrame(){
         createFrame();
     }
     //创建Frame函数
-    void createFrame(){
+    private void createFrame(){
         add(createSelfpanel());
         add(createLabelpanel());
         add(createLinkpanel());
@@ -29,7 +29,7 @@ public class ClientFrame extends JFrame {
         //添加panel
     }
     //创建selfpanel
-    public JPanel createSelfpanel(){
+    private JPanel createSelfpanel(){
         //头像Label
         ImageIcon headimg = new ImageIcon("image/头像.jpg");
         headimg.setImage(headimg.getImage().getScaledInstance(50,50,Image.SCALE_DEFAULT));
@@ -55,7 +55,7 @@ public class ClientFrame extends JFrame {
         return selfpanel;
     }
     //创建labelpanel
-    public JPanel createLabelpanel(){
+    private JPanel createLabelpanel(){
         JLabel linklabel = new JLabel("联系人",JLabel.CENTER);
         linklabel.setFont(new Font(null,Font.PLAIN,20));
         linklabel.setBounds(0,0,250,50);
@@ -69,7 +69,7 @@ public class ClientFrame extends JFrame {
         return labelpanel;
     }
     //创建linkpanel
-    public JPanel createLinkpanel(){
+    private JPanel createLinkpanel(){
         //设置联系人滚动框
         JScrollPane linkscroll = new JScrollPane();
         linkscroll.setOpaque(false);
@@ -93,7 +93,7 @@ public class ClientFrame extends JFrame {
 
     }
     //创建chatpanel
-    public JPanel createChatpanel(){
+    private JPanel createChatpanel(){
         JLabel namelabel = new JLabel();
         namelabel.setBounds(0,0,480,50);
         namelabel.setBorder(BorderFactory.createMatteBorder(0,0,1,0,gray));
@@ -120,7 +120,7 @@ public class ClientFrame extends JFrame {
         return chatpanel;
     }
     //创建textpanel
-    public JPanel createTextpanel(){
+    private JPanel createTextpanel(){
         //发送按钮
         JButton sendbutton = new JButton("发送");
         sendbutton.setBounds(410,10,70,160);
