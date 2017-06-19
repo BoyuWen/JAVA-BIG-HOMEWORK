@@ -82,19 +82,13 @@ public class ServerFrame extends JFrame implements ActionListener {
         while(true){
             try{
                 text1.append("开始监听客户端连接...\n");
-                printServerInfo();
                 Socket socket = serversocket.accept();
                 text1.append("已从IP"+socket.getInetAddress().getHostAddress()+",端口"+socket.getPort()+"接收到数据...");
-
+                
             }catch (IOException e){
 
             }
         }
-    }
-    //
-    private void printServerInfo(){
-
-
     }
     //
     public void actionPerformed(ActionEvent e){
@@ -107,7 +101,7 @@ public class ServerFrame extends JFrame implements ActionListener {
             setButton2();
             restoreButton1();
             restoreButton3();
-            card.show(tabpanel,"详情");
+            card.show(tabpanel,"通知");
         }else if(e.getSource() == button3){
             setButton3();
             restoreButton1();
@@ -119,9 +113,9 @@ public class ServerFrame extends JFrame implements ActionListener {
     private JPanel createButtonpanel(){
         //创建三个button
         button1 = new JButton("状态");
-        restoreButton1();
         button1.setBorder(BorderFactory.createMatteBorder(0,0,0,1,gray));
         button2 = new JButton("通知");
+        setButton1();
         restoreButton2();
         button2.setBorder(BorderFactory.createMatteBorder(0,0,0,1,gray));
         button3 = new JButton("用户");
@@ -169,7 +163,7 @@ public class ServerFrame extends JFrame implements ActionListener {
         tabpanel.setBounds(10,45,330,415);
         tabpanel.setBorder(BorderFactory.createEmptyBorder());
         tabpanel.add(scroll1,"状态");
-        tabpanel.add(scroll2,"详情");
+        tabpanel.add(scroll2,"通知");
         tabpanel.add(scroll3,"用户");
         return tabpanel;
     }
