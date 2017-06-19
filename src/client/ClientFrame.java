@@ -2,15 +2,34 @@ package client;
 
 import javax.swing.*;
 import java.awt.*;
+import java.io.*;
+import java.net.Socket;
 
 /**
  * Created by Dr.Wen on 2017/6/11.
  */
 public class ClientFrame extends JFrame {
+    JLabel imglabel;
+    JButton logoutbutton,exitbutton;
+    JPanel selfpanel;
+    //private DataOutputStream out;
+    //private DataInputStream in;
     private Color blue = new Color(9,164,220);
     private Color gray = new Color(201,202,203);
     private ClientFrame(){
         createFrame();
+        //
+        try {
+            Socket client = new Socket("location",8888);
+            new Thread(new ClientReceiveThread(client)).start();
+        } catch (IOException e) {
+
+        }
+        //
+        addEvent();
+    }
+    private void addEvent(){
+
     }
     //创建Frame函数
     private void createFrame(){
@@ -33,18 +52,18 @@ public class ClientFrame extends JFrame {
         //头像Label
         ImageIcon headimg = new ImageIcon("image/头像.jpg");
         headimg.setImage(headimg.getImage().getScaledInstance(50,50,Image.SCALE_DEFAULT));
-        JLabel imglabel = new JLabel(headimg);
+        imglabel = new JLabel(headimg);
         imglabel.setBounds(10,10,50,50);
         //注销按钮
-        JButton logoutbutton = new JButton("注销");
+        logoutbutton = new JButton("注销");
         logoutbutton.setBounds(5,455,60,30);
         logoutbutton.setForeground(blue);
         //退出按钮
-        JButton exitbutton = new JButton("退出");
+        exitbutton = new JButton("退出");
         exitbutton.setBounds(5,485,60,30);
         exitbutton.setForeground(blue);
         //设置selfpanel
-        JPanel selfpanel = new JPanel();
+        selfpanel = new JPanel();
         selfpanel.setLayout(null);
         selfpanel.setBounds(0,0,70,550);
         selfpanel.setBackground(blue);
