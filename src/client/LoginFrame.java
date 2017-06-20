@@ -6,6 +6,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
+import java.sql.*;
 
 /**
  * Created by Dr.Wen on 2017/6/11.
@@ -27,13 +28,31 @@ public class LoginFrame extends JFrame {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
                 String namestr = name.getText();
-                String pwdstr = pwd.getPassword().toString().trim();
-                if (namestr.equals("") || pwdstr.equals("")){
+                String pwdstr = String.valueOf(pwd.getPassword());
+                if (namestr.equals("") || pwdstr.equals("") || namestr.equals("QQ号/手机号/邮箱") || pwdstr.equals("*********")){
                     JOptionPane.showMessageDialog(null,"请输入账号和密码");
                 }else{
-                    if (!namestr.equals("100001")) {//账号不存在
+                    try {
+                        Class.forName("com.mysql.jdbc.Driver");
+                        Connection con = DriverManager.getConnection("jdbc:mysql://127.0.0.1:3306/ChatSoftWare","root","wdywdy318");
+                        PreparedStatement state = con.createStatement();
+                    } catch (ClassNotFoundException e) {
+                        System.exit(0);
+                    } catch (SQLException e) {
+                        System.exit(0);
+                    }
+                    if (!namestr.equals("100001")) {     //账号不存在
                         JOptionPane.showMessageDialog(null,"账号不存在,请重新输入");
-
+                        name.setText("QQ号/手机号/邮箱");
+                        pwd.setText("*********");
+                    }else{                                //账号存在
+                        if (!pwdstr.equals("100001")){   //密码不正确
+                            JOptionPane.showMessageDialog(null,"密码不正确,请重新输入");
+                            pwd.setText("");
+                        }else{             //密码正确
+                            new ClientFrame();
+                            dispose();
+                        }
                     }
                 }
             }
@@ -76,7 +95,7 @@ public class LoginFrame extends JFrame {
         centerpanel.setLayout(null);
         //文本密码框
         String info1 = "QQ号/手机号/邮箱";
-        String info2 = "********";
+        String info2 = "*********";
         name = new JTextField();
         pwd = new JPasswordField();
         name.setText(info1);

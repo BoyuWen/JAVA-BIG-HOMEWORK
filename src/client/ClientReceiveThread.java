@@ -44,7 +44,6 @@ public class ClientReceiveThread implements Runnable{
         chattext.append("对方:\n");
         chattext.append("    "+str+"\n");
     }
-
     public void run(){
         String str = null;
         while(isRun){

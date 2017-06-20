@@ -82,7 +82,7 @@ public class ServerFrame extends JFrame implements ActionListener {
             try{
                 text1.append("监听客户端连接...\n");
                 Socket server = serversocket.accept();
-                text1.append("已从IP"+server.getInetAddress().getHostAddress()+",端口"+server.getPort()+"接收到数据...\n");
+                text1.append("已从IP "+server.getInetAddress().getHostAddress()+",端口 "+server.getPort()+" 接收到数据...\n");
                 ServerThread serverthread = new ServerThread(server,all);
                 all.add(serverthread);
                 new Thread(serverthread).start();

@@ -23,10 +23,9 @@ public class ClientFrame extends JFrame {
 
     private DataOutputStream out;
     private Socket client;
-    //private DataInputStream in;
     private Color blue = new Color(9,164,220);
     private Color gray = new Color(201,202,203);
-    private ClientFrame(){
+    public ClientFrame(){
         createFrame();
         //
         try {
@@ -40,13 +39,6 @@ public class ClientFrame extends JFrame {
         addEvent();
     }
     private void addEvent(){
-        //关闭
-//        addWindowListener(new WindowAdapter() {
-//            public void windowClosing(WindowEvent e){
-//                closeAll();
-//                System.exit(0);
-//            }
-//        });
         //注销按钮
         logoutbutton.addActionListener(new ActionListener() {
             @Override
@@ -62,6 +54,14 @@ public class ClientFrame extends JFrame {
                     }
                     chattext.setText("\t\t您已下线");
                 }
+            }
+        });
+        //退出按钮
+        exitbutton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent actionEvent) {
+                //监听下线消息
+                System.exit(0);
             }
         });
         //发送按钮
