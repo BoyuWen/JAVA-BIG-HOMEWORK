@@ -2,11 +2,10 @@ package client;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.FocusEvent;
-import java.awt.event.FocusListener;
+import java.awt.event.*;
 import java.sql.*;
+
+import static javax.swing.JOptionPane.*;
 
 /**
  * Created by Dr.Wen on 2017/6/11.
@@ -18,8 +17,19 @@ public class LoginFrame extends JFrame {
     private JPasswordField pwd;
     private JButton btnlogin;
 
+    private Connection con;
+    private PreparedStatement ps;
+
     private LoginFrame(){
         createFrame();
+        try {
+            Class.forName("com.mysql.jdbc.Driver");
+            con = DriverManager.getConnection("jdbc:mysql://127.0.0.1:3306/ChatSoftware?characterEncoding=utf8","root","wdywdy318");
+        } catch (ClassNotFoundException e) {
+            System.exit(0);
+        } catch (SQLException e) {
+            System.exit(0);
+        }
         addEvent();
     }
     //添加事件
@@ -27,29 +37,47 @@ public class LoginFrame extends JFrame {
         btnlogin.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
+                String nick = null;
                 String namestr = name.getText();
                 String pwdstr = String.valueOf(pwd.getPassword());
                 if (namestr.equals("") || pwdstr.equals("") || namestr.equals("QQ号/手机号/邮箱") || pwdstr.equals("*********")){
                     JOptionPane.showMessageDialog(null,"请输入账号和密码");
                 }else{
-                    try {
-                        Class.forName("com.mysql.jdbc.Driver");
-                        Connection con = DriverManager.getConnection("jdbc:mysql://127.0.0.1:3306/ChatSoftWare","root","wdywdy318");
-                        PreparedStatement state = con.createStatement();
-                    } catch (ClassNotFoundException e) {
-                        System.exit(0);
-                    } catch (SQLException e) {
-                        System.exit(0);
-                    }
-                    if (!namestr.equals("100001")) {     //账号不存在
-                        JOptionPane.showMessageDialog(null,"账号不存在,请重新输入");
-                        name.setText("QQ号/手机号/邮箱");
-                        pwd.setText("*********");
-                    }else{                                //账号存在
+                    if (!namestr.equals("100001")) {   //账号不存在
+                        int t = JOptionPane.showConfirmDialog(null,"账号不存在,是否注册新用户?","",JOptionPane.OK_CANCEL_OPTION);
+                        if (t != YES_OPTION){   //不注册新用户
+                            name.setText("QQ号/手机号/邮箱");
+                            pwd.setText("*********");
+                        }else {   //注册新用户
+                            nick = JOptionPane.showInputDialog("请输入您的昵称:");
+                            if (nick == null){
+                                name.setText("QQ号/手机号/邮箱");
+                                pwd.setText("*********");
+                            }else if (nick.equals("") ){   //昵称为空
+                                JOptionPane.showMessageDialog(null,"注册失败,昵称不能为空");
+                                name.setText("QQ号/手机号/邮箱");
+                                pwd.setText("*********");
+                            }else{   //昵称非空
+                                String sql = "insert into AccountInfo() values(?,?,?)";
+                                try {
+                                    ps = con.prepareStatement(sql);
+                                    ps.setObject(1,namestr);
+                                    ps.setObject(2,pwdstr);
+                                    ps.setObject(3,nick);
+                                    ps.executeUpdate();
+                                    JOptionPane.showMessageDialog(null,"注册成功");
+                                    new ClientFrame();
+                                    dispose();
+                                } catch (SQLException e) {
+                                    System.exit(0);
+                                }
+                            }
+                        }
+                    }else{   //账号存在
                         if (!pwdstr.equals("100001")){   //密码不正确
                             JOptionPane.showMessageDialog(null,"密码不正确,请重新输入");
                             pwd.setText("");
-                        }else{             //密码正确
+                        }else{   //密码正确
                             new ClientFrame();
                             dispose();
                         }
