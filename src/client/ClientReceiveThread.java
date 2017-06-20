@@ -42,7 +42,7 @@ public class ClientReceiveThread implements Runnable{
     //在面板显示
     private void show(String str){
         chattext.append("对方:\n");
-        chattext.append("\t\t"+str+"\n");
+        chattext.append("    "+str+"\n");
     }
 
     public void run(){

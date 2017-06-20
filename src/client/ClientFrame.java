@@ -1,13 +1,15 @@
 package client;
 
+import server.ServerThread;
+
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+import java.awt.event.*;
 import java.io.*;
 import java.net.Socket;
 
 import static Tool.CloseUtil.closeAll;
+import static javax.swing.JOptionPane.YES_OPTION;
 
 /**
  * Created by Dr.Wen on 2017/6/11.
@@ -28,15 +30,41 @@ public class ClientFrame extends JFrame {
         createFrame();
         //
         try {
-            client = new Socket("location",8888);
+            client = new Socket("127.0.0.1",8888);
             new Thread(new ClientReceiveThread(client,chattext)).start();
         } catch (IOException e) {
-
+            JOptionPane.showMessageDialog(null,"服务器没有启动!");
+            System.exit(0);
         }
         //
         addEvent();
     }
     private void addEvent(){
+        //关闭
+//        addWindowListener(new WindowAdapter() {
+//            public void windowClosing(WindowEvent e){
+//                closeAll();
+//                System.exit(0);
+//            }
+//        });
+        //注销按钮
+        logoutbutton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent actionEvent) {
+                int t = JOptionPane.showConfirmDialog(null,"您是否确认退出登陆?","确认",JOptionPane.OK_CANCEL_OPTION);
+                if(t == YES_OPTION){
+                    //logoutinfo();
+                    closeAll();
+                    try {
+                        client.close();
+                    } catch (IOException e) {
+
+                    }
+                    chattext.setText("\t\t您已下线");
+                }
+            }
+        });
+        //发送按钮
         sendbutton.addActionListener(new ActionListener() {
             String str = null;
             @Override
@@ -49,15 +77,24 @@ public class ClientFrame extends JFrame {
                 str = inputtext.getText();
                 try {
                     out.writeUTF(str);
+                    out.flush();
                 } catch (IOException e) {
                     closeAll();
                 }
                 chattext.append("我:\n");
-                chattext.append("\t\t"+str+"\n");
+                chattext.append("    "+str+"\n");
                 inputtext.setText("");
             }
         });
     }
+//    //发送离线消息
+//    private void logoutinfo(){
+//        try {
+//            out.writeUTF("logout");
+//        } catch (IOException e) {
+//            closeAll();
+//        }
+//    }
     //创建Frame函数
     private void createFrame(){
         add(createSelfpanel());

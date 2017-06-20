@@ -5,6 +5,7 @@ import java.awt.*;
 import java.awt.event.*;
 import java.io.IOException;
 import java.net.*;
+import java.util.ArrayList;
 
 import static Tool.CloseUtil.closeAll;
 
@@ -23,6 +24,8 @@ public class ServerFrame extends JFrame implements ActionListener {
     private Font hindfont = new Font(null,1,17);
     private Color blue = new Color(9,164,220);
     private Color gray = new Color(231,231,231);
+
+    private ArrayList<ServerThread> all = new ArrayList<ServerThread>();
     private ServerSocket serversocket;
 
     private ServerFrame(){
@@ -77,10 +80,12 @@ public class ServerFrame extends JFrame implements ActionListener {
     private void startServer(){
         while(true){
             try{
-                text1.append("开始监听客户端连接...\n");
-                Socket socket = serversocket.accept();
-                text1.append("已从IP"+socket.getInetAddress().getHostAddress()+",端口"+socket.getPort()+"接收到数据...");
-                
+                text1.append("监听客户端连接...\n");
+                Socket server = serversocket.accept();
+                text1.append("已从IP"+server.getInetAddress().getHostAddress()+",端口"+server.getPort()+"接收到数据...\n");
+                ServerThread serverthread = new ServerThread(server,all);
+                all.add(serverthread);
+                new Thread(serverthread).start();
             }catch (IOException e){
                 closeAll();
             }
