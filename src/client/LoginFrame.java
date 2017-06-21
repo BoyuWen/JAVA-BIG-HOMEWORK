@@ -17,8 +17,7 @@ public class LoginFrame extends JFrame {
     private JPasswordField pwd;
     private JButton btnlogin;
 
-    private Connection con;
-    private PreparedStatement ps;
+    private Connection con = null;
 
     private LoginFrame(){
         createFrame();
@@ -36,14 +35,45 @@ public class LoginFrame extends JFrame {
     private void addEvent(){
         btnlogin.addActionListener(new ActionListener() {
             @Override
-            public void actionPerformed(ActionEvent actionEvent) {
+            public void actionPerformed(ActionEvent actionEvent){
                 String nick = null;
                 String namestr = name.getText();
                 String pwdstr = String.valueOf(pwd.getPassword());
+
+                PreparedStatement ps = null;
+                ResultSet rs = null;
+                String existaccount = null;
+                String existpassword = null;
+                String existnick = null;
+                Boolean exist = false;
+                //获取数据库信息
+                try {
+                    String sql_select = "select * from AccountInfo";
+                    ps = con.prepareStatement(sql_select);
+                    rs = ps.executeQuery();
+                    while(rs.next()){
+                        existaccount = rs.getString(1);
+                        if (namestr.equals(existaccount)){
+                            exist = true;
+                            existpassword = rs.getString(2);
+                            existnick = rs.getString(3);
+                            break;
+                        }
+                    }
+                } catch (SQLException e) {
+
+                }finally{
+                    try {
+                        ps.close();
+                    } catch (SQLException e) {}
+                    try{
+                        rs.close();
+                    } catch (SQLException e) {}
+                }
                 if (namestr.equals("") || pwdstr.equals("") || namestr.equals("QQ号/手机号/邮箱") || pwdstr.equals("*********")){
                     JOptionPane.showMessageDialog(null,"请输入账号和密码");
                 }else{
-                    if (!namestr.equals("100001")) {   //账号不存在
+                    if (!exist) {   //账号不存在
                         int t = JOptionPane.showConfirmDialog(null,"账号不存在,是否注册新用户?","",JOptionPane.OK_CANCEL_OPTION);
                         if (t != YES_OPTION){   //不注册新用户
                             name.setText("QQ号/手机号/邮箱");
@@ -58,6 +88,7 @@ public class LoginFrame extends JFrame {
                                 name.setText("QQ号/手机号/邮箱");
                                 pwd.setText("*********");
                             }else{   //昵称非空
+                                //数据库插入新用户
                                 String sql = "insert into AccountInfo() values(?,?,?)";
                                 try {
                                     ps = con.prepareStatement(sql);
@@ -66,19 +97,28 @@ public class LoginFrame extends JFrame {
                                     ps.setObject(3,nick);
                                     ps.executeUpdate();
                                     JOptionPane.showMessageDialog(null,"注册成功");
-                                    new ClientFrame();
+                                    new ClientFrame(namestr,nick);
                                     dispose();
                                 } catch (SQLException e) {
                                     System.exit(0);
+                                }finally{
+                                    try{
+                                        ps.close();
+                                    } catch (SQLException e) {}
+                                    try {
+                                        con.close();
+                                    } catch (SQLException e) {}
                                 }
                             }
                         }
                     }else{   //账号存在
-                        if (!pwdstr.equals("100001")){   //密码不正确
+                        if (!pwdstr.equals(existpassword)){   //密码不正确
                             JOptionPane.showMessageDialog(null,"密码不正确,请重新输入");
                             pwd.setText("");
+                            pwd.requestFocus();
                         }else{   //密码正确
-                            new ClientFrame();
+                            JOptionPane.showMessageDialog(null,"登录成功");
+                            new ClientFrame(existaccount,existnick);
                             dispose();
                         }
                     }

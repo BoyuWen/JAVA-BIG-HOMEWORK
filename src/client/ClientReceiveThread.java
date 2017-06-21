@@ -11,14 +11,18 @@ import static Tool.CloseUtil.closeAll;
  */
 public class ClientReceiveThread implements Runnable{
     JTextArea chattext;
-    //private DataOutputStream out;
+    private DataOutputStream out;
     private DataInputStream in;
     private Boolean isRun = true;
+    private String account = null;
+    private String nickname = null;
 
-    public ClientReceiveThread(Socket client, JTextArea chattext){
+    public ClientReceiveThread(Socket client, JTextArea chattext,String account,String nickname){
         this.chattext = chattext;
+        this.account = account;
+        this.nickname = nickname;
         try {
-            //out = new DataOutputStream(client.getOutputStream());
+            out = new DataOutputStream(client.getOutputStream());
             in = new DataInputStream(client.getInputStream());
         } catch (IOException e) {
             isRun = false;
@@ -39,12 +43,23 @@ public class ClientReceiveThread implements Runnable{
         }
         return str;
     }
+    //发送事件消息
+    private void send(String str){
+        try {
+            out.writeUTF(str);
+            out.flush();
+        } catch (IOException e) {
+
+        }
+
+    }
     //在面板显示
     private void show(String str){
         chattext.append("对方:\n");
         chattext.append("    "+str+"\n");
     }
     public void run(){
+        send("用户:"+nickname+" 已登录");
         String str = null;
         while(isRun){
             str = receive();

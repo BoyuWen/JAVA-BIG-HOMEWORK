@@ -7,6 +7,8 @@ import java.awt.*;
 import java.awt.event.*;
 import java.io.*;
 import java.net.Socket;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
 
 import static Tool.CloseUtil.closeAll;
 import static javax.swing.JOptionPane.YES_OPTION;
@@ -25,19 +27,28 @@ public class ClientFrame extends JFrame {
     private Socket client;
     private Color blue = new Color(9,164,220);
     private Color gray = new Color(201,202,203);
-    public ClientFrame(){
+
+    private String account = null;
+    private String nickname = null;
+
+    public ClientFrame(String account,String nickname){
+        this.account = account;
+        this.nickname = nickname;
         createFrame();
-        //
+        messageSend();
+        addEvent();
+    }
+    //进入聊天室通知方法
+    private void messageSend(){
         try {
             client = new Socket("127.0.0.1",8888);
-            new Thread(new ClientReceiveThread(client,chattext)).start();
+            new Thread(new ClientReceiveThread(client,chattext,account,nickname)).start();
         } catch (IOException e) {
             JOptionPane.showMessageDialog(null,"服务器没有启动!");
             System.exit(0);
         }
-        //
-        addEvent();
     }
+    //添加事件方法
     private void addEvent(){
         //注销按钮
         logoutbutton.addActionListener(new ActionListener() {
@@ -139,7 +150,7 @@ public class ClientFrame extends JFrame {
     }
     //创建labelpanel
     private JPanel createLabelpanel(){
-        linklabel = new JLabel("联系人",JLabel.CENTER);
+        linklabel = new JLabel("在线用户",JLabel.CENTER);
         linklabel.setFont(new Font(null,Font.PLAIN,20));
         linklabel.setBounds(0,0,250,50);
 
@@ -171,13 +182,14 @@ public class ClientFrame extends JFrame {
         //添加组件
         return linkpanel;
     }
-    //添加联系人方法
+    //添加在线用户方法
     public void addLinkman(String name,String account,String password){
 
     }
     //创建chatpanel
     private JPanel createChatpanel(){
-        namelabel = new JLabel();
+        namelabel = new JLabel("聊天室",JLabel.CENTER);
+        namelabel.setFont(new Font(null,Font.PLAIN,20));
         namelabel.setBounds(0,0,480,50);
         namelabel.setBorder(BorderFactory.createMatteBorder(0,0,1,0,gray));
         //聊天文本框
@@ -229,6 +241,6 @@ public class ClientFrame extends JFrame {
         return textpanel;
     }
     public static void main(String[] args){
-        new ClientFrame();
+        new ClientFrame("10000005","天玺");
     }
 }
