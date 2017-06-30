@@ -1,14 +1,13 @@
 package client;
 
-import server.ServerThread;
-
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.*;
 import java.net.Socket;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
+import java.sql.*;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 
 import static Tool.CloseUtil.closeAll;
 import static javax.swing.JOptionPane.YES_OPTION;
@@ -21,28 +20,49 @@ public class ClientFrame extends JFrame {
     private JButton logoutbutton,exitbutton,sendbutton;
     private JPanel selfpanel,labelpanel,linkpanel,chatpanel,textpanel;
     private JScrollPane linkscroll,chatscroll,inputscroll;
-    private JTextArea chattext,inputtext;
+    private JTextArea linktext,chattext,inputtext;
 
-    private DataOutputStream out;
     private Socket client;
+    private DataOutputStream output;
     private Color blue = new Color(9,164,220);
     private Color gray = new Color(201,202,203);
 
     private String account = null;
     private String nickname = null;
 
+    private Connection con;
+
     public ClientFrame(String account,String nickname){
         this.account = account;
         this.nickname = nickname;
         createFrame();
+        onlineUsers();
         messageSend();
         addEvent();
     }
-    //进入聊天室通知方法
+    //连接在线用户表并插入记录
+    private void onlineUsers(){
+        String sql = "insert into OnlineUsers() values(?,?)";
+        PreparedStatement ps;
+        try {
+            Class.forName("com.mysql.jdbc.Driver");
+            con = DriverManager.getConnection("jdbc:mysql://127.0.0.1:3306/ChatSoftware?characterEncoding=utf8","root","wdywdy318");
+            ps = con.prepareStatement(sql);
+            ps.setString(1,account);
+            ps.setString(2,nickname);
+            ps.executeUpdate();
+            ps.close();
+        } catch (ClassNotFoundException e) {
+            System.exit(0);
+        } catch (SQLException e) {
+            System.exit(0);
+        }
+    }
+    //建立Socket通信
     private void messageSend(){
         try {
             client = new Socket("127.0.0.1",8888);
-            new Thread(new ClientReceiveThread(client,chattext,account,nickname)).start();
+            new Thread(new ClientReceiveThread(client,con,linktext,chattext,account,nickname)).start();
         } catch (IOException e) {
             JOptionPane.showMessageDialog(null,"服务器没有启动!");
             System.exit(0);
@@ -50,19 +70,40 @@ public class ClientFrame extends JFrame {
     }
     //添加事件方法
     private void addEvent(){
+        //关闭按钮
+        addWindowListener(new WindowAdapter()
+        {
+            @Override
+            public void windowClosing(WindowEvent event)
+            {
+                deleteUser();
+                try {
+                    output = new DataOutputStream(client.getOutputStream());
+                    output.writeUTF("e1ex0xi2it9t");
+                    output.flush();
+                } catch (IOException e) {}
+                try {
+                    client.close();
+                } catch (IOException e) {}
+                System.exit(0);
+            }
+        });
         //注销按钮
         logoutbutton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
-                int t = JOptionPane.showConfirmDialog(null,"您是否确认退出登陆?","确认",JOptionPane.OK_CANCEL_OPTION);
+                int t = JOptionPane.showConfirmDialog(null,"您是否确认注销?","确认",JOptionPane.OK_CANCEL_OPTION);
                 if(t == YES_OPTION){
-                    //logoutinfo();
+                    deleteUser();
+                    try {
+                        output = new DataOutputStream(client.getOutputStream());
+                        output.writeUTF("e1ex0xi2it9t");
+                        output.flush();
+                    } catch (IOException e) {}
                     closeAll();
                     try {
                         client.close();
-                    } catch (IOException e) {
-
-                    }
+                    } catch (IOException e) {}
                     chattext.setText("\t\t您已下线");
                 }
             }
@@ -71,41 +112,69 @@ public class ClientFrame extends JFrame {
         exitbutton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
-                //监听下线消息
-                System.exit(0);
+                int t = JOptionPane.showConfirmDialog(null,"您是否确认退出?","",JOptionPane.OK_CANCEL_OPTION);
+                if (t == YES_OPTION){
+                    deleteUser();
+                    try {
+                        output = new DataOutputStream(client.getOutputStream());
+                        output.writeUTF("e1ex0xi2it9t");
+                        output.flush();
+                    } catch (IOException e) {}
+                    closeAll();
+                    try {
+                        client.close();
+                    } catch (IOException e) {}
+                    System.exit(0);
+                }
             }
         });
         //发送按钮
         sendbutton.addActionListener(new ActionListener() {
-            String str = null;
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
                 try {
-                    out = new DataOutputStream(client.getOutputStream());
+                    output = new DataOutputStream(client.getOutputStream());
+                    System.out.println("new output");
                 } catch (IOException e) {
+                    System.out.println("new output closeall");
                     closeAll();
                 }
-                str = inputtext.getText();
-                try {
-                    out.writeUTF(str);
-                    out.flush();
-                } catch (IOException e) {
-                    closeAll();
+                String str = inputtext.getText();
+                if (str!=null && !str.equals("")){
+                    Date date=new Date(System.currentTimeMillis());
+                    DateFormat format=new SimpleDateFormat("HH:mm:ss");
+                    String time=format.format(date);
+                    System.out.println(time);
+                    try {
+                        output.writeUTF(nickname+"  "+time+"\n     "+str+"\n");
+                        output.flush();
+                        System.out.println("button write");
+                    } catch (IOException e) {
+                        closeAll();
+                        System.out.println("button closeall");
+                    }
+                    chattext.append("我:\n");
+                    chattext.append("     "+str+"\n");
+                    inputtext.setText("");
                 }
-                chattext.append("我:\n");
-                chattext.append("    "+str+"\n");
-                inputtext.setText("");
             }
         });
     }
-//    //发送离线消息
-//    private void logoutinfo(){
-//        try {
-//            out.writeUTF("logout");
-//        } catch (IOException e) {
-//            closeAll();
-//        }
-//    }
+    //删除在线用户表记录
+    private void deleteUser(){
+        String sql = "delete from OnlineUsers where account=?";
+        try {
+            PreparedStatement ps = con.prepareStatement(sql);
+            ps.setString(1,account);
+            ps.executeUpdate();
+            ps.close();
+            System.out.println("delete");
+        } catch (SQLException e) {
+            System.out.println("delete exit");
+            System.exit(0);
+        }
+    }
+
     //创建Frame函数
     private void createFrame(){
         add(createSelfpanel());
@@ -119,8 +188,8 @@ public class ClientFrame extends JFrame {
         setVisible(true);
         setDefaultCloseOperation(3);
         setSize(800,550);
+        setResizable(false);
         setLocationRelativeTo(null);
-        //添加panel
     }
     //创建selfpanel
     private JPanel createSelfpanel(){
@@ -164,8 +233,12 @@ public class ClientFrame extends JFrame {
     }
     //创建linkpanel
     private JPanel createLinkpanel(){
+        linktext = new JTextArea();
+        linktext.setOpaque(false);
+        linktext.setLineWrap(true);
+        linktext.setEditable(false);
         //设置联系人滚动框
-        linkscroll = new JScrollPane();
+        linkscroll = new JScrollPane(linktext);
         linkscroll.setOpaque(false);
         linkscroll.getViewport().setOpaque(false);
         linkscroll.setBounds(0,0,240,550);
@@ -175,16 +248,9 @@ public class ClientFrame extends JFrame {
         linkpanel.setBackground(new Color(250,250,250));
         linkpanel.setBounds(80,50,240,550);
         linkpanel.setBorder(BorderFactory.createMatteBorder(0,0,0,1,gray));
-        //箱式布局设置
-        BoxLayout boxlayout = new BoxLayout(linkpanel,BoxLayout.Y_AXIS);
-        linkpanel.setLayout(boxlayout);
+        linkpanel.setLayout(null);
         linkpanel.add(linkscroll);
-        //添加组件
         return linkpanel;
-    }
-    //添加在线用户方法
-    public void addLinkman(String name,String account,String password){
-
     }
     //创建chatpanel
     private JPanel createChatpanel(){
@@ -239,8 +305,5 @@ public class ClientFrame extends JFrame {
         textpanel.add(sendbutton);
         textpanel.add(inputscroll);
         return textpanel;
-    }
-    public static void main(String[] args){
-        new ClientFrame("10000005","天玺");
     }
 }

@@ -3,6 +3,7 @@ package server;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
+import java.io.DataInputStream;
 import java.io.IOException;
 import java.net.*;
 import java.util.ArrayList;
@@ -41,6 +42,7 @@ public class ServerFrame extends JFrame implements ActionListener {
         setLayout(null);
         setTitle("服务器端");
         setSize(320,465);
+        setResizable(false);
         setLocationRelativeTo(null);
         setVisible(true);
     }
@@ -79,15 +81,40 @@ public class ServerFrame extends JFrame implements ActionListener {
     private void startServer(){
         while(true){
             try{
-                text1.append("监听客户端连接...\n");
+                text1.append("监听客户端连接中...\n");
                 Socket server = serversocket.accept();
+                DataInputStream in = new DataInputStream(server.getInputStream());
                 text1.append("已从IP "+server.getInetAddress().getHostAddress()+",端口 "+server.getPort()+" 接收到数据...\n");
-                ServerThread serverthread = new ServerThread(server,all);
+                String account = in.readUTF();
+                String nickname = in.readUTF();
+                ServerThread serverthread = new ServerThread(server,all,account,nickname,text1,text3);
                 all.add(serverthread);
+                text1.append("用户:"+account+","+nickname+" 已上线\n");
+                writeList();
+                sendAll(nickname);
                 new Thread(serverthread).start();
             }catch (IOException e){
                 closeAll();
             }
+        }
+    }
+    //发送系统消息
+    private void sendAll(String nickname){
+        for (ServerThread temp:all){
+            String str = "\t                用户 "+nickname+" 进入聊天室\n";
+            temp.send(str);
+        }
+    }
+    //绘制在线用户列表
+    private void writeList(){
+        String account;
+        String nickname;
+        text3.setText("");
+        text3.append("\t账号\t昵称\n");
+        for (ServerThread temp:all){
+            account = temp.getAccount();
+            nickname = temp.getNickname();
+            text3.append("\t"+account+"\t"+nickname+"\n");
         }
     }
     //
@@ -104,7 +131,6 @@ public class ServerFrame extends JFrame implements ActionListener {
     }
     //创建buttonpanel
     private JPanel createButtonpanel(){
-        //创建三个button
         button1 = new JButton("状态监听");
         setButton1();
         button3 = new JButton("在线用户");

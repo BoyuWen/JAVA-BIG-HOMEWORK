@@ -36,7 +36,7 @@ public class LoginFrame extends JFrame {
         btnlogin.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent actionEvent){
-                String nick = null;
+                String nick;
                 String namestr = name.getText();
                 String pwdstr = String.valueOf(pwd.getPassword());
 
@@ -134,6 +134,7 @@ public class LoginFrame extends JFrame {
         add(setCenterpanel(),BorderLayout.CENTER);
         setSize(395,310);
         setLocationRelativeTo(null);
+        setResizable(false);
         setVisible(true);
         setDefaultCloseOperation(3);
     }
